@@ -9,14 +9,14 @@ server.use(express.json());
 
 // conexión a la base de datos
 const getConnection = async () => {
-    return await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "",           // sin contraseña explícitamente
-      database: "simpsons",
-      port: 3306
-    });
-  };
+  return await mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT
+  });
+};
 
 // ruta real GET /frases
 server.get("/frases", async (req, res) => {
@@ -39,6 +39,156 @@ server.get("/frases", async (req, res) => {
   } catch (err) {
     console.error("❌ Error en la consulta:", err);
     res.status(500).json({ error: "Error al obtener las frases" });
+  }
+});
+
+server.get("/frases/:id", async (req, res) => {
+  const fraseId = req.params.id;
+
+  try {
+    const conn = await getConnection();
+    const [result] = await conn.query(
+      `
+      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+             personajes.nombre AS personaje
+      FROM frases
+      JOIN personajes ON frases.personaje_id = personajes.id
+      WHERE frases.id = ?
+    `,
+      [fraseId]
+    );
+    await conn.end();
+
+    if (result.length === 0) {
+      res.status(404).json({ error: "Frase no encontrada" });
+    } else {
+      res.json(result[0]);
+    }
+  } catch (err) {
+    console.error("❌ Error en la consulta por ID:", err);
+    res.status(500).json({ error: "Error al obtener la frase" });
+  }
+});
+
+server.get('/personajes', async (req, res) => {
+  try {
+    const conn = await getConnection();
+    const [results] = await conn.query('SELECT * FROM personajes');
+    await conn.end();
+
+    res.json(results);
+  } catch (error) {
+    console.error('❌ Error en la consulta de personajes:', error);
+    res.status(500).json({ error: 'Error al obtener los personajes' });
+  }
+});
+
+server.post("/frases", async (req, res) => {
+  try {
+    const { texto, marca_tiempo, descripcion, personaje_id } = req.body;
+
+    if (!texto || !personaje_id) {
+      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+
+    const conn = await getConnection();
+    const [result] = await conn.query(
+      `
+      INSERT INTO frases (texto, marca_tiempo, descripcion, personaje_id)
+      VALUES (?, ?, ?, ?)
+    `,
+      [texto, marca_tiempo, descripcion, personaje_id]
+    );
+    await conn.end();
+
+    res.status(201).json({
+      success: true,
+      id: result.insertId,
+      message: "Frase insertada correctamente"
+    });
+  } catch (err) {
+    console.error("❌ Error al insertar frase:", err);
+    res.status(500).json({ error: "Error al insertar la frase" });
+  }
+});
+
+server.put("/frases/:id", async (req, res) => {
+  const fraseId = req.params.id;
+  const { texto, marca_tiempo, descripcion, personaje_id } = req.body;
+
+  if (!texto || !personaje_id) {
+    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  }
+
+  try {
+    const conn = await getConnection();
+    const [result] = await conn.query(
+      `
+      UPDATE frases
+      SET texto = ?, marca_tiempo = ?, descripcion = ?, personaje_id = ?
+      WHERE id = ?
+    `,
+      [texto, marca_tiempo, descripcion, personaje_id, fraseId]
+    );
+    await conn.end();
+
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Frase no encontrada" });
+    } else {
+      res.json({ success: true, message: "Frase actualizada correctamente" });
+    }
+  } catch (err) {
+    console.error("❌ Error al actualizar frase:", err);
+    res.status(500).json({ error: "Error al actualizar la frase" });
+  }
+});
+
+server.delete("/frases/:id", async (req, res) => {
+  const fraseId = req.params.id;
+
+  try {
+    const conn = await getConnection();
+    const [result] = await conn.query(
+      `DELETE FROM frases WHERE id = ?`,
+      [fraseId]
+    );
+    await conn.end();
+
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Frase no encontrada" });
+    } else {
+      res.json({ success: true, message: "Frase eliminada correctamente" });
+    }
+  } catch (err) {
+    console.error("❌ Error al eliminar frase:", err);
+    res.status(500).json({ error: "Error al eliminar la frase" });
+  }
+});
+
+server.get("/frases/personaje/:personaje_id", async (req, res) => {
+  const personajeId = req.params.personaje_id;
+
+  try {
+    const conn = await getConnection();
+    const [results] = await conn.query(
+      `
+      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+             personajes.nombre AS personaje
+      FROM frases
+      JOIN personajes ON frases.personaje_id = personajes.id
+      WHERE personaje_id = ?
+    `,
+      [personajeId]
+    );
+    await conn.end();
+
+    res.json({
+      info: { count: results.length },
+      result: results
+    });
+  } catch (err) {
+    console.error("❌ Error en frases por personaje:", err);
+    res.status(500).json({ error: "Error al obtener frases del personaje" });
   }
 });
 
