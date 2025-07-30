@@ -25,10 +25,12 @@ server.get("/frases", async (req, res) => {
   try {
     const conn = await getConnection();
     const [result] = await conn.query(`
-      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
-             personajes.nombre AS personaje
-      FROM frases
-      JOIN personajes ON frases.personaje_id = personajes.id
+       SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+         personajes.nombre AS personaje,
+         capitulos.titulo AS capitulo
+       FROM frases
+       JOIN personajes ON frases.personaje_id = personajes.id
+       LEFT JOIN capitulos ON frases.capitulo_id = capitulos.id
     `);
     await conn.end();
 
