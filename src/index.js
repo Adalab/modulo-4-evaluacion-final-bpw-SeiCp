@@ -192,6 +192,55 @@ server.get("/frases/personaje/:personaje_id", async (req, res) => {
   }
 });
 
+server.get("/capitulos", async (req, res) => {
+  try {
+    const conn = await getConnection();
+    const [results] = await conn.query(`
+      SELECT id, titulo, numero_episodio, temporada, fecha_emision, sinopsis
+      FROM capitulos
+    `);
+    await conn.end();
+
+    res.json({
+      info: { count: results.length },
+      result: results
+    });
+  } catch (err) {
+    console.error("❌ Error al obtener capítulos:", err);
+    res.status(500).json({ error: "Error al obtener los capítulos" });
+  }
+});
+
+server.get("/frases/capitulo/:capitulo_id", async (req, res) => {
+  const capituloId = req.params.capitulo_id;
+
+  try {
+    const conn = await getConnection();
+    const [results] = await conn.query(
+      `
+      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+             personajes.nombre AS personaje,
+             capitulos.titulo AS capitulo
+      FROM frases
+      JOIN personajes ON frases.personaje_id = personajes.id
+      JOIN capitulos ON frases.capitulo_id = capitulos.id
+      WHERE frases.capitulo_id = ?
+    `,
+      [capituloId]
+    );
+    await conn.end();
+
+    res.json({
+      info: { count: results.length },
+      result: results
+    });
+  } catch (err) {
+    console.error("❌ Error en frases por capítulo:", err);
+    res.status(500).json({ error: "Error al obtener frases del capítulo" });
+  }
+});
+
+
 // escuchar el servidor
 const port = process.env.PORT || 4000;
 server.listen(port, () => {
