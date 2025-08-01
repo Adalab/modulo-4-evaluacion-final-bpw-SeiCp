@@ -24,8 +24,8 @@ server.get('/frases', async (req, res) => { //se crea la ruta para get/frases. G
     const conn = await getConnection(); //Llamamos a la función
     const [result] = await conn.query(`
       SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
-         personajes.nombre AS personaje,
-         capitulos.titulo AS capitulo
+             personajes.nombre,
+             capitulos.titulo
       FROM frases
       JOIN personajes ON frases.personaje_id = personajes.id
       LEFT JOIN capitulos ON frases.capitulo_id = capitulos.id`); //Hacemos la consulta pero en lugar de solo ids, jutamos la frase con cada personaje y capítulo
@@ -55,7 +55,7 @@ server.get('/frases/:id', async (req, res) => {
        WHERE frases.id = ?`,
       [id]
     );
-
+    
     await conn.end(); // cerramos la conexión
 
     if (results.length === 0) {
@@ -83,38 +83,42 @@ server.get('/personajes', async (req, res) => {
   }
 });
 
+/// Crear una nueva frase
 server.post('/frases', async (req, res) => {
+  // Recogemos los datos del body 
+  const texto = req.body.texto;
+  const marca_tiempo = req.body.marca_tiempo;
+  const descripcion = req.body.descripcion;
+  const personaje_id = req.body.personaje_id;
+  const capitulo_id = req.body.capitulo_id;
+
+  //Validar si vienen los parámetros
+
   try {
-    const { texto, marca_tiempo, descripcion, personaje_id } = req.body;
+    const conn = await getConnection(); // Nos conectamos a la base de datos
 
-    if (!texto || !personaje_id) {
-      return res.status(400).json({ error: "Faltan campos obligatorios" });
-    }
+    // Preparamos la consulta SQL para insertar la frase
+    let sql = `INSERT INTO frases (texto, marca_tiempo, descripcion, personaje_id, capitulo_id) 
+               VALUES (?, ?, ?, ?, ?)`;
 
-    const conn = await getConnection();
-    const [result] = await conn.query(
-      `
-      INSERT INTO frases (texto, marca_tiempo, descripcion, personaje_id)
-      VALUES (?, ?, ?, ?)
-    `,
-      [texto, marca_tiempo, descripcion, personaje_id]
-    );
-    await conn.end();
+    const [results] = await conn.query(sql, [texto, marca_tiempo, descripcion, personaje_id, capitulo_id]);
 
+    await conn.end(); // Cerramos la conexión
+
+    //Validamos si se ha podido. Enviamos respuesta al front con success y el id insertado
     res.status(201).json({
       success: true,
-      id: result.insertId,
-      message: "Frase insertada correctamente"
+      id: results.insertId
     });
-  } catch (err) {
-    console.error("Error al insertar frase:", err);
-    res.status(500).json({ error: "Error al insertar la frase" });
+
+  } catch (error) {
+    res.status(500).json({ error: error }); // Si algo falla, lo capturamos
   }
 });
 
+
 //Actualizar una frase. Cuando se actualiza se actualiza TODO
 server.put('/frases/:id', async (req, res) => {
-  server.put('/frases/:id', async (req, res) => {
     const id = req.params.id; // recogemos el id de la frase a actualizar
   
     // recogemos los datos que nos llegan del body
@@ -150,9 +154,7 @@ server.put('/frases/:id', async (req, res) => {
     }
   });
   
-  
-
-
+ 
 // Eliminar una frase por su ID
 server.delete('/frases/:id', async (req, res) => {
   const id = req.params.id; // recogemos el id que llega por la URL
@@ -188,15 +190,14 @@ server.get('/frases/personaje/:personaje_id', async (req, res) => {
   try {
     const conn = await getConnection();
     const [results] = await conn.query(
-      `
-      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
-             personajes.nombre AS personaje
-      FROM frases
-      JOIN personajes ON frases.personaje_id = personajes.id
-      WHERE personaje_id = ?
-    `,
+      `SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+              personajes.nombre
+       FROM frases
+       JOIN personajes ON frases.personaje_id = personajes.id
+       WHERE personaje_id = ?`,
       [personajeId]
     );
+
     await conn.end();
 
     res.json({
@@ -214,8 +215,8 @@ server.get('/capitulos', async (req, res) => {
     const conn = await getConnection();
     const [results] = await conn.query(`
       SELECT id, titulo, numero_episodio, temporada, fecha_emision, sinopsis
-      FROM capitulos
-    `);
+      FROM capitulos`);
+      
     await conn.end();
 
     res.json({
@@ -234,17 +235,16 @@ server.get('/frases/capitulo/:capitulo_id', async (req, res) => {
   try {
     const conn = await getConnection();
     const [results] = await conn.query(
-      `
-      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
-             personajes.nombre AS personaje,
-             capitulos.titulo AS capitulo
+      `SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+          personajes.nombre,
+          capitulos.titulo
       FROM frases
       JOIN personajes ON frases.personaje_id = personajes.id
       JOIN capitulos ON frases.capitulo_id = capitulos.id
-      WHERE frases.capitulo_id = ?
-    `,
+      WHERE frases.capitulo_id = ?`,
       [capituloId]
     );
+
     await conn.end();
 
     res.json({
