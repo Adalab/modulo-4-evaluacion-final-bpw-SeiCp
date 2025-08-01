@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2/promise");
-require('dotenv').config();
+const mysql = require("mysql2/promise"); //Esto siempre hay que ponerlo porque si no no podemos hacer el away y el async
+require('dotenv').config(); //
 
 const server = express();
 server.use(cors());
@@ -43,13 +43,11 @@ server.get('/frases/:id', async (req, res) => {
 
     const conn = await getConnection();
     const [result] = await conn.query(
-      `
-      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+      `SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
              personajes.nombre AS personaje
-      FROM frases
-      JOIN personajes ON frases.personaje_id = personajes.id
-      WHERE frases.id = ?
-    `,
+       FROM frases
+       JOIN personajes ON frases.personaje_id = personajes.id
+       WHERE frases.id = ?`,
       [fraseId]
     );
     await conn.end();
@@ -69,12 +67,12 @@ server.get('/personajes', async (req, res) => {
 
     res.json(results);
   } catch (error) {
-    console.error('❌ Error en la consulta de personajes:', error);
+    console.error('Error en la consulta de personajes:', error);
     res.status(500).json({ error: 'Error al obtener los personajes' });
   }
 });
 
-server.post("/frases", async (req, res) => {
+server.post('/frases', async (req, res) => {
   try {
     const { texto, marca_tiempo, descripcion, personaje_id } = req.body;
 
@@ -98,12 +96,12 @@ server.post("/frases", async (req, res) => {
       message: "Frase insertada correctamente"
     });
   } catch (err) {
-    console.error("❌ Error al insertar frase:", err);
+    console.error("Error al insertar frase:", err);
     res.status(500).json({ error: "Error al insertar la frase" });
   }
 });
 
-server.put("/frases/:id", async (req, res) => {
+server.put('/frases/:id', async (req, res) => {
   const fraseId = req.params.id;
   const { texto, marca_tiempo, descripcion, personaje_id } = req.body;
 
@@ -129,12 +127,12 @@ server.put("/frases/:id", async (req, res) => {
       res.json({ success: true, message: "Frase actualizada correctamente" });
     }
   } catch (err) {
-    console.error("❌ Error al actualizar frase:", err);
+    console.error("Error al actualizar frase:", err);
     res.status(500).json({ error: "Error al actualizar la frase" });
   }
 });
 
-server.delete("/frases/:id", async (req, res) => {
+server.delete('/frases/:id', async (req, res) => {
   const fraseId = req.params.id;
 
   try {
@@ -151,12 +149,12 @@ server.delete("/frases/:id", async (req, res) => {
       res.json({ success: true, message: "Frase eliminada correctamente" });
     }
   } catch (err) {
-    console.error("❌ Error al eliminar frase:", err);
+    console.error("Error al eliminar frase:", err);
     res.status(500).json({ error: "Error al eliminar la frase" });
   }
 });
 
-server.get("/frases/personaje/:personaje_id", async (req, res) => {
+server.get('/frases/personaje/:personaje_id', async (req, res) => {
   const personajeId = req.params.personaje_id;
 
   try {
@@ -178,12 +176,12 @@ server.get("/frases/personaje/:personaje_id", async (req, res) => {
       result: results
     });
   } catch (err) {
-    console.error("❌ Error en frases por personaje:", err);
+    console.error("Error en frases por personaje:", err);
     res.status(500).json({ error: "Error al obtener frases del personaje" });
   }
 });
 
-server.get("/capitulos", async (req, res) => {
+server.get('/capitulos', async (req, res) => {
   try {
     const conn = await getConnection();
     const [results] = await conn.query(`
@@ -197,12 +195,12 @@ server.get("/capitulos", async (req, res) => {
       result: results
     });
   } catch (err) {
-    console.error("❌ Error al obtener capítulos:", err);
+    console.error("Error al obtener capítulos:", err);
     res.status(500).json({ error: "Error al obtener los capítulos" });
   }
 });
 
-server.get("/frases/capitulo/:capitulo_id", async (req, res) => {
+server.get('/frases/capitulo/:capitulo_id', async (req, res) => {
   const capituloId = req.params.capitulo_id;
 
   try {
@@ -226,7 +224,7 @@ server.get("/frases/capitulo/:capitulo_id", async (req, res) => {
       result: results
     });
   } catch (err) {
-    console.error("❌ Error en frases por capítulo:", err);
+    console.error("Error en frases por capítulo:", err);
     res.status(500).json({ error: "Error al obtener frases del capítulo" });
   }
 });
