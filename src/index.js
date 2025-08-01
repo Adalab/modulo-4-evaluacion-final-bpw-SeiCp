@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
-require("dotenv").config();
+require('dotenv').config();
 
 const server = express();
 server.use(cors());
@@ -19,35 +19,28 @@ const getConnection = async () => {
 };
 
 // ruta real GET /frases
-server.get("/frases", async (req, res) => {
-  console.log("📥 Llegó a /frases");
-
-  try {
-    const conn = await getConnection();
+server.get('/frases', async (req, res) => { //se crea la ruta para get/frases. Get para obtener 
+  
+    const conn = await getConnection(); //Llamamos a la función
     const [result] = await conn.query(`
-       SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
+      SELECT frases.id, frases.texto, frases.marca_tiempo, frases.descripcion,
          personajes.nombre AS personaje,
          capitulos.titulo AS capitulo
-       FROM frases
-       JOIN personajes ON frases.personaje_id = personajes.id
-       LEFT JOIN capitulos ON frases.capitulo_id = capitulos.id
-    `);
-    await conn.end();
+      FROM frases
+      JOIN personajes ON frases.personaje_id = personajes.id
+      LEFT JOIN capitulos ON frases.capitulo_id = capitulos.id`); //Hacemos la consulta pero en lugar de solo ids, jutamos la frase con cada personaje y capítulo
+    await conn.end(); //cerramos la conexión tras la consulta
 
     res.json({
-      info: { count: result.length },
+      info: { count: result.length }, //Es la info del back al
       result: result
     });
-  } catch (err) {
-    console.error("❌ Error en la consulta:", err);
-    res.status(500).json({ error: "Error al obtener las frases" });
-  }
+    
 });
 
-server.get("/frases/:id", async (req, res) => {
+server.get('/frases/:id', async (req, res) => {
   const fraseId = req.params.id;
 
-  try {
     const conn = await getConnection();
     const [result] = await conn.query(
       `
@@ -66,10 +59,6 @@ server.get("/frases/:id", async (req, res) => {
     } else {
       res.json(result[0]);
     }
-  } catch (err) {
-    console.error("❌ Error en la consulta por ID:", err);
-    res.status(500).json({ error: "Error al obtener la frase" });
-  }
 });
 
 server.get('/personajes', async (req, res) => {
@@ -244,7 +233,7 @@ server.get("/frases/capitulo/:capitulo_id", async (req, res) => {
 
 
 // escuchar el servidor
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4000;//Puerto en el que se ejecuta el servidor. El 3306 es de la base de datos
 server.listen(port, () => {
   console.log(`🚀 Servidor encendido en http://localhost:${port}`);
 });
