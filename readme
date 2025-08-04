@@ -43,7 +43,7 @@ El título del capítulo (si está asociado)
    Devuelve todas las frases dichas por un personaje concreto. Por ejemplo, puedes ver todo lo que ha dicho Bart si usas su ID.
 
 2. GET /frases/capitulo/:capitulo_id
-   Saca todas las frases de un capítulo específico. Por si quieres revivir momentazos míticos.
+   Saca todas las frases de un capítulo específico. Por si tienes tiempo y quieres revivir momentazos.
 
 3. GET /personajes
    Lista de todos los personajes que hay en la base de datos.
@@ -54,6 +54,7 @@ El título del capítulo (si está asociado)
 Explicación extra o lo que se llama un bonus track de toda la vida:
 
 - Todas las peticiones funcionan con http://localhost:4000/ si lo tienes en local (y dale cariño porque costó que funcionase, así que trátalo con amor).
-- Cuando uses Postman para enviar datos (por ejemplo, al hacer POST o PUT), ve a la pestaña Body, elige raw, y luego selecciona JSON.
-  Es como decirle: “te voy a pasar esto en formato .json, estate atento”.
+- Cuando uses Postman para enviar datos (por ejemplo, al hacer POST o PUT), ve a la parte de abajo del enlacedonde pone "params", "Authorization", "Headers" y marca "Body", y debajo selecciona raw y JSON. Esto es como decirle: “te voy a pasar esto en formato .json, estate atento”.
 - Las respuestas siempre devuelven algo como { success: true } o un error si algo va mal.
+
+Espero que te sirva porque ni hacer esta explicación ha sido fácil.
