@@ -2,7 +2,7 @@ He aquí una guía para amigas de las APIS, aunque te parezca tan complejo que m
 
 Hay que aprender amigas, así que bienvenidas a:
 
-# "Cómo consumir esta API sin volverse loca":
+# "Cómo consumir esta API sin volverse loca"
 
 Vale, si has llegado hasta aquí, es porque quieres usar la API de frases míticas de Los Simpsons. Te explico cómo va esto, sin dramas (o lo intentaré, no prometo nada).
 
@@ -10,7 +10,7 @@ Vale, si has llegado hasta aquí, es porque quieres usar la API de frases mític
 
 # Endpoints disponibles
 
-1. GET /frases
+1. **GET /frases**
    Te devuelve un listado completo de frases. Cada frase viene con:
 
    El texto
@@ -23,6 +23,7 @@ Vale, si has llegado hasta aquí, es porque quieres usar la API de frases mític
 3. **POST /frases**
    Crea una frase nueva. Eso sí, necesitas mandarle un body en formato JSON algo así como esto:
 
+```json
    {
    "texto": "¡Ay, caramba!",
    "marca_tiempo": "00:12",
@@ -51,10 +52,11 @@ Vale, si has llegado hasta aquí, es porque quieres usar la API de frases mític
 4. **GET /capitulos**
    Lista de todos los capítulos. Muy útil para hacer relaciones en el frontend o para elegir el ID al crear frases.
 
-# Explicación extra o lo que se llama un bonus track de toda la vida:
+## Explicación extra o lo que se llama un bonus track de toda la vida
 
 - Todas las peticiones funcionan con http://localhost:4000/ si lo tienes en local (y dale cariño porque costó que funcionase, así que trátalo con amor).
 - Cuando uses Postman para enviar datos (por ejemplo, al hacer POST o PUT), ve a la parte de abajo del enlacedonde pone "params", "Authorization", "Headers" y marca "Body", y debajo selecciona raw y JSON. Esto es como decirle: “te voy a pasar esto en formato .json, estate atento”.
 - Las respuestas siempre devuelven algo como { success: true } o un error si algo va mal.
 
 Espero que te sirva porque ni hacer esta explicación ha sido fácil.
+```
